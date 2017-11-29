@@ -3,6 +3,7 @@ from .base import Source
 
 class Row:
     def __init__(self, **data):
+        self._attrs = list(data.keys())
         self._source = None
         for name, value in data.items():
             setattr(self, name, value)
@@ -13,7 +14,7 @@ class Row:
 
     def __setattr__(self, attr, value):
         super().__setattr__(attr, value)
-        if not attr.startswith('_'):
+        if attr in self._attrs:
             if self._source is not None:
                 self._source._notify('change', item=self)
 
@@ -99,6 +100,6 @@ class ListSource(Source):
         return self.insert(len(self), *values, **named)
 
     def remove(self, node):
-        self._data.remove(node)
         self._notify('remove', item=node)
+        self._data.remove(node)
         return node
